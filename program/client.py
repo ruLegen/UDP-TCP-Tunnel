@@ -1,5 +1,5 @@
 import stun
-import time
+from time import sleep
 from sub_tools.externalvars import *
 import socket
 
@@ -20,4 +20,4 @@ while 1:
     sock.sendto('MSM',(REMOTE_HOST , REMOTE_PORT))
     conn, addr = sock.recvfrom(1024)
     print('client addr: ', (addr,conn))
-    time.delay(1);
+    sleep(1)
