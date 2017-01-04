@@ -12,10 +12,12 @@ import sys
 #OWN_EXTERNAL_IP = result.external_ip;
 #OWN_EXTERNAL_PORT = result.external_port;
 
+
 sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM);
 sock.bind((SOURCE_HOST,SOURCE_PORT));
+
 while 1:
-    sock.send('MSM',(REMOTE_HOST , REMOTE_PORT))
+    sock.sendto('MSM',(REMOTE_HOST , REMOTE_PORT))
     conn, addr = sock.recvfrom(1024)
     print('client addr: ', (addr,conn))
     time.delay(1);
