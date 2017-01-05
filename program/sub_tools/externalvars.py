@@ -17,12 +17,13 @@ OWN_EXTERNAL_PORT=0
 
 SIGNALSERVERHOST = args.signalserver
 OWN_DATA = {}
+REPEAT_TIME_USERSEARCHER = 2
+FORCENAME = args.forcename
 URLS = {
     'register':'/reguser',
     'getuser':'/viewuser',
     'update': '/updateuser'
 }
-REPEAT_TIME_USERSEARCHER = 2
 #print(args)
 
 def doStunRequest():
@@ -48,6 +49,9 @@ def regUser():
         print ('Registred')
         return 1
     else:
+        if FORCENAME:
+            updUser()
+            return 1
         print ('This username %s already is using. Please Choose another name'%USERNAME)
         USERNAME = raw_input("Enter user name: ")
         regUser()
@@ -75,7 +79,6 @@ def updUser():
     response = int(request.text)
     if response:
         print ('Data Changed')
-        getInfo()
         return 1
     else:
         print ('Data not Changed')

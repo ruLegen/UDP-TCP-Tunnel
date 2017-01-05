@@ -111,8 +111,8 @@ function UpdateUser(params) {
         }
         else
         {
-            Users[username].ip = userip;
-            Users[username].port = userport;
+            Users[username].userip = userip;
+            Users[username].userport = userport;
             response.writeHead(200, {'Content-Type': 'application/json'});
             response.write('1');
             response.end();
