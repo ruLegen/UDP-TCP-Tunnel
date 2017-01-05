@@ -23,7 +23,8 @@ else:
     sock.bind((SOURCE_HOST, SOURCE_PORT));
 
     while 1:
-        sock.sendto('12', (export('REMOTE_HOST'), export('REMOTE_PORT')))
+        sock.sendto('12', (export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
         conn, addr = sock.recvfrom(1024)
+        print('Tunel probit')
         print('client addr: ', (addr, conn), time.clock())
         time.sleep(1)
