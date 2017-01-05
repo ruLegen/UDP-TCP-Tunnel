@@ -29,7 +29,10 @@
                         Host wich will trying connect. Default is 0.0.0.0
   --remotehost REMOTEHOST, -rh REMOTEHOST
                         Remote host
-===============================================================================
+                        
+ </pre>
+---                        
+<pre>
 if flag -directconnection is not set will use next vars
 
   --username USERNAME, -u USERNAME
