@@ -29,10 +29,7 @@
                         Host wich will trying connect. Default is 0.0.0.0
   --remotehost REMOTEHOST, -rh REMOTEHOST
                         Remote host
-                        
- </pre>
----                        
-<pre>
+
 if flag -directconnection is not set will use next vars
 
   --username USERNAME, -u USERNAME
@@ -46,3 +43,10 @@ if flag -directconnection is not set will use next vars
                         Use the registered name. Use already existing name
 
   </pre>
+  
+ ## Examples
+ 
+<pre>
+ + python client.py -d -sp 9865 -rp 3254 -rh 98.235.658.214
+ + python client.py -sp 1234 -u MyUserName -ru Max123 -ss http://domain.com:8052 
+</pre>
