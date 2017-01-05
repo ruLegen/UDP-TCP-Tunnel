@@ -247,7 +247,7 @@ def get_nat_type(s, source_ip, source_port, stun_host=None, stun_port=3478):
 def get_ip_info(source_ip="0.0.0.0", source_port=54320, stun_host=None,
                 stun_port=3478):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.settimeout(2)
+    s.settimeout(0.3)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((source_ip, source_port))
     nat_type, nat = get_nat_type(s, source_ip, source_port,
@@ -255,4 +255,11 @@ def get_ip_info(source_ip="0.0.0.0", source_port=54320, stun_host=None,
     external_ip = nat['ExternalIP']
     external_port = nat['ExternalPort']
     s.close()
-    return (nat_type, external_ip, external_port,source_ip,source_port)
+    result={}
+    result['nat_type'] = nat_type;
+    result['external_ip'] = external_ip
+    result['external_port'] = external_port
+    result['source_ip'] = source_ip
+    result['source_port'] = source_port
+
+    return (result)

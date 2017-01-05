@@ -19,6 +19,23 @@ def getargs():
     parser.add_argument('--remotehost','-rh',
                         action='store',
                         help='Remote host')
+    parser.add_argument('--username','-u',
+                        action='store',
+                        help='Your name',
+                        default='User')
+    parser.add_argument('--remoteusername', '-ru',
+                        action='store',
+                        help='Remote username to connect ',
+                        )
+    parser.add_argument('--directconnection', '-d',
+                        action='store_true',
+                        help='Remote username to connect ',
+                        )
+    parser.add_argument('--signalserver', '-ss',
+                        action='store',
+                        help='Signal server IP or Domain',
+                        )
+
     return parser.parse_args()
 
 

@@ -1,23 +1,29 @@
-import stun
-from time import sleep
 from sub_tools.externalvars import *
+import time
 import socket
+import threading
+doStunRequest()
 
-import sys
+if DIRECTCONNECTION:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
+    sock.bind((SOURCE_HOST, SOURCE_PORT));
+    while 1:
+        message = raw_input();
+        sock.sendto(message, (REMOTE_HOST, REMOTE_PORT))
+        conn, addr = sock.recvfrom(1024)
+        print('client addr: ', (addr, conn), time.clock())
+        time.sleep(1)
+else:
+    regUser()
+    getUser()
+    getInfo()
+    print 'Trying connect to him'
 
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
+    sock.bind((SOURCE_HOST, SOURCE_PORT));
 
-#result = stun.get_ip_info(source_ip=SOURCE_HOST,
-#                          source_port=SOURCE_PORT,
-#                          stun_host=stun.STUN_SERVERS[0]);
-#OWN_EXTERNAL_IP = result.external_ip;
-#OWN_EXTERNAL_PORT = result.external_port;
-
-
-sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM);
-sock.bind((SOURCE_HOST,SOURCE_PORT));
-
-while 1:
-    sock.sendto('MSM',(REMOTE_HOST , REMOTE_PORT))
-    conn, addr = sock.recvfrom(1024)
-    print('client addr: ', (addr,conn))
-    sleep(1)
+    while 1:
+        sock.sendto('12', (export('REMOTE_HOST'), export('REMOTE_PORT')))
+        conn, addr = sock.recvfrom(1024)
+        print('client addr: ', (addr, conn), time.clock())
+        time.sleep(1)
