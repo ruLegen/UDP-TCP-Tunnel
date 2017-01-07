@@ -27,10 +27,11 @@ else:
         sock.sendto(message, (export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
         conn, addr = sock.recvfrom(1024)
         print('Tunel probit')
-        if iterator > 6:
+        if iterator > 3:
             message = 'close'
         if conn == 'close':
             print ('Tunnel is working')
+            sock.sendto('close', (export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
             break
         print('client addr: ', (addr, conn), time.clock())
         time.sleep(1)
