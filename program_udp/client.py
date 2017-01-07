@@ -28,3 +28,5 @@ else:
         print('Tunel probit')
         print('client addr: ', (addr, conn), time.clock())
         time.sleep(1)
+        break
+    print ('Tunnel is working')
