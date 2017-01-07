@@ -50,15 +50,18 @@ if isServer:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((SOURCE_HOST, SOURCE_PORT));
-        conn, addr = sock.recvfrom(2048)
+        conn = sock.recv(2048)
+
         print """Something came\n{0}""".format(conn)
         localSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         localSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        localSocket.bind((SOURCE_PORT,localRandomPort))
+        localSocket.bind((SOURCE_HOST,localRandomPort))
+
         print """Redirecting to {0}:{1}""".format(SOURCE_HOST,SOURCE_PORT)
         localSocket.sendto(conn,(SOURCE_HOST,localSharePort))
         localData,localAddr = localSocket.recvfrom(2048)
         localSocket.close()
+
         sock.sendto(localData,(export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
 else:
     while 1:
@@ -71,8 +74,9 @@ else:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((SOURCE_HOST, SOURCE_PORT));
-        sock.sendto(conn, (export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
-        remoteData, remoteAddr = sock.recvfrom(2048)
+        data = conn.recv(2048)
+        sock.sendto(data, (export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
+        remoteData = sock.recv(2048)
 
         localSocket.sendto(remoteData,addr)
         localSocket.close()
