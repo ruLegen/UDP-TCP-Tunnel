@@ -21,12 +21,18 @@ else:
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
     sock.bind((SOURCE_HOST, SOURCE_PORT));
-
+    iterator = 0
+    message = 'Hi'
     while 1:
-        sock.sendto('12', (export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
+        sock.sendto(message, (export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
         conn, addr = sock.recvfrom(1024)
         print('Tunel probit')
+        if iterator > 6:
+            message = 'close'
+        if conn == 'close':
+            print ('Tunnel is working')
+            break
         print('client addr: ', (addr, conn), time.clock())
         time.sleep(1)
-        break
-    print ('Tunnel is working')
+        iterator = iterator+1
+
