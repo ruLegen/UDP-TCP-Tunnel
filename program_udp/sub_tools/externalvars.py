@@ -11,7 +11,7 @@ SOURCE_PORT = args.sourceport
 SOURCE_HOST = args.sourcehost
 REMOTE_HOST = args.remotehost
 REMOTE_PORT = args.remoteport
-
+IS_SERVER = args.server
 OWN_EXTERNAL_IP = ''
 OWN_EXTERNAL_PORT=0
 

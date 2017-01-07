@@ -43,6 +43,11 @@ def getargs():
                         help='Use the registered name',
                         default=False
                         )
+    parser.add_argument('--server', '-s',
+                        action='store',
+                        help='Set You as Server',
+                        default=False
+                        )
     return parser.parse_args()
 
 
