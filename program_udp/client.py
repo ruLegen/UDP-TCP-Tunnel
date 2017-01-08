@@ -43,19 +43,21 @@ else:
 localSharePort = 8080
 localRandomPort = 12333
 isServer = IS_SERVER
+BUFF_SIZE = 4096
 
 
 if isServer:
     print """I'm a server listening {0}:{1}""".format(SOURCE_HOST,SOURCE_PORT)
-    while 1:
-        sock1 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
-        sock1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock1 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
+    sock1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-        sock1.bind((SOURCE_HOST, SOURCE_PORT));
+    sock1.bind((SOURCE_HOST, SOURCE_PORT));
+    while 1:
+
         connection,address = sock1.recvfrom(2048)
-        print connection
+        print address
         sdata = connection
-        localData = None
+        localData = ""
         if sdata and sdata != 'close':
             print """Something came\n{0}""".format(sdata)
             localSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -64,12 +66,17 @@ if isServer:
             print """Redirecting to {0}:{1} -- {2}""".format(SOURCE_HOST,localSharePort,sdata)
             localSocket.connect((SOURCE_HOST,localSharePort))
             localSocket.send(sdata)
-            localData = localSocket.recv(2048)
-        if localData:
+            buff=""
+            while 1:
+                localData = localSocket.recv(BUFF_SIZE)
+                buff+=localData
+                if(len(localData) <= 0):
+                    break
+                print (len(localData))
             localSocket.close()
-            sock1.sendto(localData,(export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
+            print buff[0:len(buff)-1]
+            sock1.sendto(buff[0:len(buff)-1],(export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
             sdata = None
-            localData = None
 else:
     while 1:
         localSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -77,13 +84,15 @@ else:
         localSocket.bind((SOURCE_HOST,localRandomPort))
         localSocket.listen(1)
         conn,addr = localSocket.accept()
-
+        print addr
+        data = conn.recv(BUFF_SIZE)
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((SOURCE_HOST, SOURCE_PORT));
-        data = conn.recv(2048)
-        sock.sendto(data, (export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
-        remoteData = sock.recv(2048)
 
-        localSocket.sendto(remoteData,addr)
+        sock.sendto(data, (export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
+        remoteData = sock.recv(BUFF_SIZE)
+        conn.sendall(remoteData)
+        conn.close()
+
         localSocket.close()
