@@ -32,6 +32,7 @@ else:
         if conn == 'close':
             print ('Tunnel is working')
             sock.sendto('close', (export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
+            sock.close()
             break
         print('client addr: ', (addr, conn), time.clock())
         time.sleep(1)
@@ -40,29 +41,35 @@ else:
 
 
 localSharePort = 8080
-localRandomPort = 12345
+localRandomPort = 12333
 isServer = IS_SERVER
 
 
 if isServer:
     print """I'm a server listening {0}:{1}""".format(SOURCE_HOST,SOURCE_PORT)
     while 1:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind((SOURCE_HOST, SOURCE_PORT));
-        conn = sock.recv(2048)
+        sock1 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
+        sock1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-        print """Something came\n{0}""".format(conn)
-        localSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        localSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        localSocket.bind((SOURCE_HOST,localRandomPort))
-
-        print """Redirecting to {0}:{1}""".format(SOURCE_HOST,SOURCE_PORT)
-        localSocket.sendto(conn,(SOURCE_HOST,localSharePort))
-        localData,localAddr = localSocket.recvfrom(2048)
-        localSocket.close()
-
-        sock.sendto(localData,(export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
+        sock1.bind((SOURCE_HOST, SOURCE_PORT));
+        connection,address = sock1.recvfrom(2048)
+        print connection
+        sdata = connection
+        localData = None
+        if sdata and sdata != 'close':
+            print """Something came\n{0}""".format(sdata)
+            localSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            localSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            localSocket.bind((SOURCE_HOST,localRandomPort))
+            print """Redirecting to {0}:{1} -- {2}""".format(SOURCE_HOST,localSharePort,sdata)
+            localSocket.connect((SOURCE_HOST,localSharePort))
+            localSocket.send(sdata)
+            localData = localSocket.recv(2048)
+        if localData:
+            localSocket.close()
+            sock1.sendto(localData,(export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
+            sdata = None
+            localData = None
 else:
     while 1:
         localSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
