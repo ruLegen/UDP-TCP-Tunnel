@@ -39,9 +39,10 @@ if flag -directconnection is not set will use next vars
   --signalserver SIGNALSERVER, -ss SIGNALSERVER
                         Signal server IP or Domain
                         http://some_domain.com[:some_port]
-  --forcename FORCENAME, -f FORCENAME
+  --forcename True, -f True
                         Use the registered name. Use already existing name
-
+  --server True, -s True
+                        If flag -s set, you are the server witch sharing his localhost
   </pre>
   
 ## Examples

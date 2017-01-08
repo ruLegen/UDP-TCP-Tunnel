@@ -1,6 +1,7 @@
 from sub_tools.externalvars import *
 import time
 import socket
+from math import ceil
 import threading
 doStunRequest()
 
@@ -27,7 +28,7 @@ else:
         sock.sendto(message, (export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
         conn, addr = sock.recvfrom(1024)
         print('Tunel probit')
-        if iterator > 3:
+        if iterator > 1:
             message = 'close'
         if conn == 'close':
             print ('Tunnel is working')
@@ -44,7 +45,7 @@ localSharePort = 8080
 localRandomPort = 12333
 isServer = IS_SERVER
 BUFF_SIZE = 4096
-
+MTU_SIZE = 1400
 
 if isServer:
     print """I'm a server listening {0}:{1}""".format(SOURCE_HOST,SOURCE_PORT)
@@ -74,9 +75,13 @@ if isServer:
                     break
                 print (len(localData))
             localSocket.close()
-            print buff[0:len(buff)-1]
-            sock1.sendto(buff[0:len(buff)-1],(export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
-            sdata = None
+
+            if len(buff) > MTU_SIZE:
+                for i in range(0,int(ceil(len(buff)/MTU_SIZE))+1,1):
+                    sock1.sendto(buff[MTU_SIZE*i:MTU_SIZE*(i+1)],(export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
+            else:
+                sock1.sendto(buff, (export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
+            sdata=None
 else:
     while 1:
         localSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -91,8 +96,13 @@ else:
         sock.bind((SOURCE_HOST, SOURCE_PORT));
 
         sock.sendto(data, (export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
-        remoteData = sock.recv(BUFF_SIZE)
+        remoteData=""
+        while 1:
+            localData = sock.recv(BUFF_SIZE)
+            remoteData += localData
+            if (len(localData) < MTU_SIZE):
+                break
+            print (len(localData))
         conn.sendall(remoteData)
         conn.close()
-
         localSocket.close()
