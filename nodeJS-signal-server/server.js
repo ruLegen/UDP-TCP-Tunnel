@@ -34,7 +34,7 @@ function newConnection(client){
     client.on('update-info',function (data) {               //Addition new client
         try {
             console.log('registered');
-
+            console.log(data);
             UserStore.updateUser(client.id,data);
             io.sockets.to(client.id).emit("registered",{name:data.username});//check if this user hasn't take exist name. if took delete from and disconnect him from IO;
         }
@@ -51,7 +51,7 @@ function newConnection(client){
     client.on("disconnecting",disconnectClient)
     client.on('get-user',function (data) {
         console.log("get-data");
-        console.log(data);
+
        io.sockets.to(client.id).emit("user-info",UserStore.findAllByName(data.username));
         console.log(UserStore.findAllByName(data.username))
     });

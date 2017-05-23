@@ -69,8 +69,8 @@ def doStunRequest():
     OWN_DATA['id'] = SOCKETIO_CLIENT._http_session.cookies.values()
 
     OWN_DATA['localAddress'] = SOURCE_HOST
-    OWN_DATA['remotePort'] = SOURCE_PORT
-    #print (result,DATA)
+    OWN_DATA['localPort'] = SOURCE_PORT
+    print (result,OWN_DATA)
 
 def regUser():
     global USERNAME
@@ -118,7 +118,7 @@ def updateOwnDataForRequest():
     OWN_DATA['remotePort'] = OWN_EXTERNAL_PORT
     OWN_DATA['id'] = SOCKETIO_CLIENT._http_session.cookies.values()
     OWN_DATA['localAddress'] = SOURCE_HOST
-    OWN_DATA['remotePort'] = SOURCE_PORT
+    OWN_DATA['localPort'] = SOURCE_PORT
 
 def getInfo():
     print """

@@ -10,12 +10,14 @@ def onConnected(*args):
     print('On Connected')
 
 def onUserInfo(*args):
-
+    global REMOTE_HOST
+    global REMOTE_PORT
     print "onUserInfo"
     if args[0]:
         REMOTE_HOST = args[0][0]['remoteAddress']
-        print REMOTE_HOST
         REMOTE_PORT = args[0][0]['remotePort']
+        print REMOTE_HOST
+        print REMOTE_PORT
         return 1
     else:
         print ('User {0} not found maybe he is not Regsitered. Will try in {1} seconds'.format(REMOTEUSERNAME,REPEAT_TIME_USERSEARCHER))
@@ -35,6 +37,7 @@ def onRegister(*args):
     # here is trafic redirector
     print "registered"
     getUser()
+    tunnelMaker.breakthroughTunnel(SOURCE_HOST,SOURCE_PORT,REMOTE_HOST,REMOTE_PORT)
     localSharePort = 8080
     localRandomPort = 12333
     isServer = IS_SERVER
@@ -42,7 +45,7 @@ def onRegister(*args):
     MTU_SIZE = 1400
 
     if isServer:
-        serverSharePort(SOURCE_HOST,SOURCE_PORT,REMOTE_HOST,REMOTE_PORT,localRandomPort,localSharePort)
+        tunnelMaker.serverSharePort(SOURCE_HOST,SOURCE_PORT,REMOTE_HOST,REMOTE_PORT,localRandomPort,localSharePort)
     # if you are client
     else:
         while 1:
@@ -57,7 +60,7 @@ def onRegister(*args):
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.bind((SOURCE_HOST, SOURCE_PORT));
 
-            sock.sendto(data, (export('REMOTE_HOST'), int(export('REMOTE_PORT'))))
+            sock.sendto(data, (REMOTE_HOST, int(REMOTE_PORT)))
             remoteData = ""
             while 1:
                 localData = sock.recv(BUFF_SIZE)
@@ -86,6 +89,7 @@ doStunRequest()
 if DIRECTCONNECTION:
     tunnelMaker.directConnection(SOURCE_HOST, SOURCE_PORT, REMOTE_HOST, REMOTE_PORT)
 else:
+
     regUser()
 
     getInfo()

@@ -18,6 +18,7 @@ def breakthroughTunnel(LOCAL_IP,LOCAL_PORT, REMOTE_IP, REMOTE_PORT):
     message = 'Hi'
     while 1:
         sock.sendto(message, (REMOTE_IP, int(REMOTE_PORT)))
+        print ('sended from {0} {1} to {2} {3}'.format(LOCAL_IP,LOCAL_PORT,REMOTE_IP,REMOTE_PORT))
         conn, addr = sock.recvfrom(1024)
         print('Tunel probit')
         if iterator > 1:
@@ -33,7 +34,7 @@ def breakthroughTunnel(LOCAL_IP,LOCAL_PORT, REMOTE_IP, REMOTE_PORT):
 
 
 def serverSharePort(LOCAL_IP,LOCAL_PORT,REMOTE_IP,REMOTE_PORT,LOCAL_RANDOM_PORT,LOCAL_SHARE_PORT=8080,BUFF_SIZE=4096,MTU_SIZE=1400):
-    print "I'm a server listening {0}:{1}".format(LOCAL_IP, LOCAL_PORT)
+    print "I'm a server listening {0}:{1} and sharing {2}:{3}".format(LOCAL_IP, LOCAL_PORT,LOCAL_IP,LOCAL_SHARE_PORT)
     sock1 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
     sock1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
@@ -49,8 +50,8 @@ def serverSharePort(LOCAL_IP,LOCAL_PORT,REMOTE_IP,REMOTE_PORT,LOCAL_RANDOM_PORT,
             localSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             localSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             localSocket.bind((LOCAL_IP, LOCAL_RANDOM_PORT))
-            print "Redirecting to {0}:{1} -- {2}".format(LOCAL_IP, LOCAL_SHARE_PORT, sdata)
-            localSocket.connect((LOCAL_IP, LOCAL_RANDOM_PORT))
+            print "Redirecting to {0}:{1}".format(LOCAL_IP, LOCAL_SHARE_PORT, sdata)
+            localSocket.connect((LOCAL_IP, LOCAL_SHARE_PORT))
             localSocket.send(sdata)
             buff = ""
             while 1:
@@ -64,7 +65,7 @@ def serverSharePort(LOCAL_IP,LOCAL_PORT,REMOTE_IP,REMOTE_PORT,LOCAL_RANDOM_PORT,
             if len(buff) > MTU_SIZE:
                 for i in range(0, int(ceil(len(buff) / MTU_SIZE)) + 1, 1):
                     sock1.sendto(buff[MTU_SIZE * i:MTU_SIZE * (i + 1)],
-                                 (REMOTE_IP, int(REMOTE_IP)))
+                                 (REMOTE_IP, int(REMOTE_PORT)))
             else:
-                sock1.sendto(buff, REMOTE_IP, int(REMOTE_IP))
+                sock1.sendto(buff, (REMOTE_IP, int(REMOTE_PORT)))
             sdata = None
