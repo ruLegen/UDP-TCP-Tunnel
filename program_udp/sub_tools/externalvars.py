@@ -1,5 +1,9 @@
 from sub_tools.argcontroler import getargs
+
 import stun,requests,json,time
+
+#initialize all variables
+
 args=getargs();
 
 USERNAME = args.username
@@ -16,7 +20,16 @@ OWN_EXTERNAL_IP = ''
 OWN_EXTERNAL_PORT=0
 
 SIGNALSERVERHOST = args.signalserver
-OWN_DATA = {}
+SOCKETIO_CLIENT = ""
+
+OWN_DATA = {
+    'id':"",
+    'username': "",
+    'localAddress':"",
+    'localPort':"",
+    'remoteAddress':"",
+    'remotePort': ""
+}
 REPEAT_TIME_USERSEARCHER = 2
 FORCENAME = args.forcename
 URLS = {
@@ -25,6 +38,19 @@ URLS = {
     'update': '/updateuser'
 }
 #print(args)
+def setSocketIO(socket):
+    global SOCKETIO_CLIENT
+    SOCKETIO_CLIENT=socket
+
+    #SOCKETIO_CLIENT.on('connect', onConnected)
+    #SOCKETIO_CLIENT.on('user-info', onUserInfo)
+    #SOCKETIO_CLIENT.on('error', onRegisterError)
+    #SOCKETIO_CLIENT.on('disconnect', onDisconnect)
+    #SOCKETIO_CLIENT.on('registered', onRegister)
+def onRegister(*args):
+    SOCKETIO_CLIENT.emit('sendTo')
+
+
 
 def doStunRequest():
     result = stun.get_ip_info(source_ip=SOURCE_HOST,
@@ -34,46 +60,35 @@ def doStunRequest():
     global OWN_EXTERNAL_PORT
     global OWN_DATA
     global USERNAME
+    global SOCKETIO_CLIENT
     OWN_EXTERNAL_IP = result['external_ip'];
     OWN_EXTERNAL_PORT = result['external_port'];
-    OWN_DATA = {'username': USERNAME,'userip':OWN_EXTERNAL_IP,'userport':OWN_EXTERNAL_PORT}
+    OWN_DATA['username'] = USERNAME
+    OWN_DATA['remoteAddress']=OWN_EXTERNAL_IP
+    OWN_DATA['remotePort'] = OWN_EXTERNAL_PORT
+    OWN_DATA['id'] = SOCKETIO_CLIENT._http_session.cookies.values()
 
+    OWN_DATA['localAddress'] = SOURCE_HOST
+    OWN_DATA['remotePort'] = SOURCE_PORT
     #print (result,DATA)
 
 def regUser():
     global USERNAME
+    global SOCKETIO_CLIENT
     updateOwnDataForRequest()
-    request = requests.post(SIGNALSERVERHOST+URLS['register'], data=OWN_DATA)
-    response = int(request.text)
-    if response:
-        print ('Registred')
-        return 1
-    else:
-        if FORCENAME:
-            updUser()
-            return 1
-        print ('This username %s already is using. Please Choose another name'%USERNAME)
-        USERNAME = raw_input("Enter user name: ")
-        regUser()
+    SOCKETIO_CLIENT.emit('update-info',OWN_DATA)
+    SOCKETIO_CLIENT.wait(seconds=5);
 
 
 def getUser():
     global REMOTE_HOST
     global REMOTE_PORT
-    request = requests.post(SIGNALSERVERHOST + URLS['getuser'], data={'username':REMOTEUSERNAME})
-    response = request.text
-    user = json.loads(response)
-    if len(user) > 0:
-        REMOTE_HOST = user['userip']
-        print REMOTE_HOST
-        REMOTE_PORT = user['userport']
-        return 1
-    else:
-        print ('User {0} not found maybe he is not Regsitered. Will try in {1} seconds'.format(REMOTEUSERNAME,REPEAT_TIME_USERSEARCHER))
-        time.sleep(REPEAT_TIME_USERSEARCHER)
-        getUser();
+    global SOCKETIO_CLIENT
+    SOCKETIO_CLIENT.emit('get-user',{'username':REMOTEUSERNAME})
+    SOCKETIO_CLIENT.wait(seconds=5);
 
 def updUser():
+    global SOCKETIO_CLIENT
     updateOwnDataForRequest()
     request = requests.post(SIGNALSERVERHOST + URLS['update'], data=OWN_DATA)
     response = int(request.text)
@@ -96,7 +111,14 @@ def updateOwnDataForRequest():
     global OWN_EXTERNAL_PORT
     global OWN_DATA
     global USERNAME
-    OWN_DATA = {'username': USERNAME,'userip':OWN_EXTERNAL_IP,'userport':OWN_EXTERNAL_PORT}
+    global SOCKETIO_CLIENT
+
+    OWN_DATA['username'] = USERNAME
+    OWN_DATA['remoteAddress'] = OWN_EXTERNAL_IP
+    OWN_DATA['remotePort'] = OWN_EXTERNAL_PORT
+    OWN_DATA['id'] = SOCKETIO_CLIENT._http_session.cookies.values()
+    OWN_DATA['localAddress'] = SOURCE_HOST
+    OWN_DATA['remotePort'] = SOURCE_PORT
 
 def getInfo():
     print """
@@ -121,3 +143,6 @@ def getInfo():
 
 def export(var):
     return eval(var)
+def setUsername(user):
+    global USERNAME
+    USERNAME = user
