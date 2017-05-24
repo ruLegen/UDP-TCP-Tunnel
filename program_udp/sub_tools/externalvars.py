@@ -1,5 +1,6 @@
 from sub_tools.argcontroler import getargs
-
+from sub_tools import tunnelMaker
+import socket
 import stun,requests,json,time
 
 #initialize all variables
@@ -70,7 +71,7 @@ def doStunRequest():
 
     OWN_DATA['localAddress'] = SOURCE_HOST
     OWN_DATA['localPort'] = SOURCE_PORT
-    print (result,OWN_DATA)
+    print (OWN_DATA)
 
 def regUser():
     global USERNAME
@@ -146,3 +147,39 @@ def export(var):
 def setUsername(user):
     global USERNAME
     USERNAME = user
+
+def stunRequest(SOURCE_HOST,SOURCE_PORT,STUN_SERVER):
+    result = stun.get_ip_info(source_ip=SOURCE_HOST,
+                              source_port=SOURCE_PORT,
+                              stun_host=stun.STUN_SERVERS[0]);
+    return result;
+def getFreeUdpPort():
+    udp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    udp.bind(('', 0))
+    addr, port = udp.getsockname()
+    udp.close()
+    return port
+
+def autoStunUpdate():
+    global SOCKETIO_CLIENT
+    global SOURCE_HOST
+    global SOURCE_PORT
+    global REMOTE_PORT
+    global REMOTE_HOST
+    global OWN_DATA
+    while 1:
+        time.sleep(10)
+        #freeport = getFreeUdpPort()
+        stunResult=stunRequest(SOURCE_HOST,0,stun.STUN_SERVERS[0])
+        #dataToSend={'username':USERNAME,'remoteAddress':stunResult['external_ip'],'remotePort': stunResult['external_port'], 'localAddress':stunResult['source_ip'],'localPort':stunResult['source_port]']}
+        SOURCE_PORT = stunResult['source_port']
+        SOURCE_HOST = stunResult['source_ip']
+        REMOTE_HOST = stunResult['external_ip']
+        REMOTE_PORT = stunResult['external_port']
+        updateOwnDataForRequest()
+        SOCKETIO_CLIENT.emit('update-info',OWN_DATA)
+        time.sleep(3)
+        getUser()
+
+        tunnelMaker.breakthroughTunnel(SOURCE_HOST,SOURCE_PORT,REMOTE_HOST,REMOTE_PORT)
+

@@ -69,3 +69,29 @@ def serverSharePort(LOCAL_IP,LOCAL_PORT,REMOTE_IP,REMOTE_PORT,LOCAL_RANDOM_PORT,
             else:
                 sock1.sendto(buff, (REMOTE_IP, int(REMOTE_PORT)))
             sdata = None
+
+
+def clientSharePort(LOCAL_IP,LOCAL_PORT,REMOTE_IP,REMOTE_PORT,LOCAL_RANDOM_PORT,BUFF_SIZE=4096,MTU_SIZE=1400):
+    while 1:
+        localSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        localSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        localSocket.bind((LOCAL_IP, LOCAL_RANDOM_PORT))
+        localSocket.listen(1)
+        conn, addr = localSocket.accept()
+        print addr
+        data = conn.recv(BUFF_SIZE)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.bind((LOCAL_IP, LOCAL_PORT));
+
+        sock.sendto(data, (REMOTE_IP, int(REMOTE_PORT)))
+        remoteData = ""
+        while 1:
+            localData = sock.recv(BUFF_SIZE)
+            remoteData += localData
+            if (len(localData) < MTU_SIZE):
+                break
+            print (len(localData))
+        conn.sendall(remoteData)
+        conn.close()
+        localSocket.close()
