@@ -1,5 +1,5 @@
-from sub_tools.argcontroler import getargs
-from sub_tools import tunnelMaker
+from argcontroler import getargs
+import tunnelMaker
 import socket
 import stun,requests,json,time
 
@@ -168,18 +168,12 @@ def autoStunUpdate():
     global REMOTE_HOST
     global OWN_DATA
     while 1:
-        time.sleep(10)
-        #freeport = getFreeUdpPort()
-        stunResult=stunRequest(SOURCE_HOST,0,stun.STUN_SERVERS[0])
-        #dataToSend={'username':USERNAME,'remoteAddress':stunResult['external_ip'],'remotePort': stunResult['external_port'], 'localAddress':stunResult['source_ip'],'localPort':stunResult['source_port]']}
-        SOURCE_PORT = stunResult['source_port']
-        SOURCE_HOST = stunResult['source_ip']
-        REMOTE_HOST = stunResult['external_ip']
-        REMOTE_PORT = stunResult['external_port']
-        updateOwnDataForRequest()
-        SOCKETIO_CLIENT.emit('update-info',OWN_DATA)
-        time.sleep(3)
-        getUser()
-
-        tunnelMaker.breakthroughTunnel(SOURCE_HOST,SOURCE_PORT,REMOTE_HOST,REMOTE_PORT)
-
+        try:
+            print "Stun going to update"
+            time.sleep(10)
+            stunResult=stunRequest(SOURCE_HOST,SOURCE_PORT,stun.STUN_SERVERS[0])
+            print "Updated"
+            print stunResult
+            time.sleep(3)
+        except(Exception):
+            print "wtf"

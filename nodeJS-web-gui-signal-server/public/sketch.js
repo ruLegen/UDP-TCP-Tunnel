@@ -1,10 +1,11 @@
 var socket;
 var myID;
-var servername = "localhost:8001";
+var servername = "localhost:8000";
 //var servername ="http://d2834146.ngrok.io"
 var searchedUsers;
 var currentUser;
-
+var stunUpdated = false
+var lastmodalID = 0;
 var selfInfo = {
     id:"",
     username: "",
@@ -13,7 +14,9 @@ var selfInfo = {
     remoteAddress:"",
     remotePort: ""
 }
-
+$(window).on('beforeunload', function(){
+    socket.close();
+});
 var translatedInfo ={
     id:"ID",
     username: "Имя",
@@ -27,20 +30,47 @@ var translatedInfo ={
 
 }
 
-
-function setup() {
-
-    socket = io.connect(servername);
-    socket.on('message',gotMessage);            //when message is comming
+$(document).ready(function()
+{
+   socket = io.connect(servername);
+     socket.on('message',gotMessage);            //when message is comming
     socket.on('connect',connected);             //what to do when connected to server
     socket.on('user-info',remoteUserInfo);      //when getting info about user
     socket.on('error',onRegisterError);             //when comming some error from server
     socket.on('disconnect',lostConnection);     //when user disconnected from server
     socket.on('registered',onRegister);
+    socket.on('update-self-info',selfInfoUpdate)
+    socket.on('connection-accept',connectionAccept)
+    socket.on('connection-decline',connectionDecline)
 
+});
+
+function connectionAccept(data) {
+       Materialize.toast("Запрос принят ("+data.username+")",4000,"green");
+     args = "--directconnection"+
+            " --sourceport " + selfInfo.localPort+
+            " --sourcehost " + selfInfo.localAddress +
+            " --remotehost " + data.remoteAddress +
+            " --remoteport " + data.remotePort
+    stunFrame = document.createElement('iframe');
+    stunFrame.src = "tunnel://"+args;
+    stunFrame.id="STUN_FRAME";
+    stunFrame.width = "1";
+    console.log("tunnel://"+args)
+
+    $('#info-block').append(stunFrame);
+    $(stunFrame).remove();
+}
+function connectionDecline(data) {
+     Materialize.toast("Запрос отклонен ("+data.username+")",4000,"red");
 }
 
-
+function selfInfoUpdate(data) {
+    console.log(data)
+    selfInfo = data;
+    stunUpdated = true;
+    renderSelfInfo()
+}
 
 function remoteUserInfo(data) {
     $('.progress').animate({opacity: 1},400);
@@ -60,7 +90,14 @@ function sendTo(data) {
 }
 
 function gotMessage(data) {
-Materialize.toast("Юзер "+data.username + "упомянул вас",1500,"green");
+    var from = data;
+    console.log(data)
+    createModal("Запрос от "+from.username,"Хотите подключиться к нему?",function () {
+        socket.emit('accept',{to:from.id,user:selfInfo});
+        connectionAccept(data)
+    },function () {
+        socket.emit('decline',{to:from.id,user:selfInfo});
+    });
 
 }
 function connected(data) {
@@ -89,7 +126,14 @@ function onRegister(data) {
         });
         renderSelfInfo();
         $('#send-button').click(function () {
-            sendTo(currentUser);
+            if(stunUpdated)
+                sendTo(currentUser);
+            else
+                Materialize.toast("Обновите свои настройки",4000,"red");
+        });
+        $('#update-stun').click(function () {
+            updateStun()
+
         });
     });
 
@@ -98,6 +142,25 @@ function onRegister(data) {
 }
 function lostConnection() {
     
+}
+function updateStun() {
+    port = prompt("Which port do u like to pin?")
+
+    args = "--username "+ selfInfo.username+
+            " --action " + "stun"+
+            " --server " + servername +
+            " --localport " + port +
+            " --id " + selfInfo.id
+    stunFrame = document.createElement('iframe');
+    stunFrame.src = "webhandler://"+args;
+    stunFrame.id="STUN_FRAME";
+    stunFrame.width = "1";
+    $('#info-block').append(stunFrame);
+    $(stunFrame).remove();
+
+
+
+    //window.assign(link.href)
 }
 
 function register() {
@@ -163,4 +226,45 @@ function renderRemoteInfo() {
 
 
 
+}
+
+
+function createModal(header,text,onagree,ondisagree) {
+    var modalWraper = document.createElement('div');
+        modalWraper.id = "wraper"+lastmodalID;
+
+    var modal = document.createElement('div');
+        modal.id = "modal"+lastmodalID;
+        modal.className = "modal";
+    var modalContent = document.createElement('div');
+        modalContent.className = "modal-content";
+    var modalHeader = document.createElement("h4")
+        modalHeader.textContent = header;
+    var modalText = document.createElement("p");
+        modalText.textContent = text;
+    var modalFooter = document.createElement('div');
+        modalFooter.className = "modal-footer";
+    var agree = document.createElement('a');
+        agree.onclick = onagree;
+        agree.textContent = "Да"
+    var disagree = document.createElement('a');
+        disagree.onclick = ondisagree;
+        disagree.textContent = "Нет"
+    agree.className = "modal-action modal-close waves-effect waves-green btn-flat";
+    disagree.className = "modal-action modal-close waves-effect waves-green btn-flat";
+
+    modalFooter.appendChild(disagree);
+    modalFooter.appendChild(agree);
+
+    modalContent.appendChild(modalHeader);
+    modalContent.appendChild(modalText);
+
+
+    modal.appendChild(modalContent);
+    modal.appendChild(modalFooter);
+    modalWraper.appendChild(modal)
+    $(modal).modal();
+    $(modal).modal('open');
+    $('#info-block').append(modalWraper)
+    return modalWraper
 }

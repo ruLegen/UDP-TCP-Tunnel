@@ -1,9 +1,8 @@
 var express = require('express');
 var socket = require('socket.io');
 var user = require('user');
-
 var app = express();
-var server = app.listen(8001);
+var server = app.listen(8000);
 	app.use(express.static('public'));
 var io = socket(server);
 var UserStore = new user.UserStore();
@@ -19,7 +18,12 @@ function newConnection(client){
     //io.sockets.emit("clients",connectedClients);
 
     client.on('sendTo',function (data) {
-        this.to(data.id).emit('message',{});
+        try {
+            this.to(data.id).emit('message',UserStore.findById(client.id));
+        }
+        catch (e){
+            console.log(e)
+        }
     });
 
     client.on("get-clients",function (data) {
@@ -46,6 +50,18 @@ function newConnection(client){
 
        io.sockets.to(client.id).emit("user-info",UserStore.findAllByName(data.username));
     });
+    client.on('update',function (data) {
+        UserStore.updateUserWithoutCheck(data.id,data)
+        io.sockets.to(data.id).emit('update-self-info',data)
+        console.log(data)
+    })
+    client.on('accept',function (data) {
+      io.sockets.to(data.to).emit('connection-accept',data.user)
+    })
+    client.on('decline',function (data) {
+      io.sockets.to(data.to).emit('connection-decline',data.user)
+    })
+
 }
 
 function disconnectClient() {

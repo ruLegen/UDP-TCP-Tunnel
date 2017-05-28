@@ -1,4 +1,17 @@
 import argparse
+import sys
+import time
+
+args = sys.argv[1]
+if args.startswith("tunnel://"):
+    del sys.argv[1]
+    if "%20" in args:
+        sys.argv = sys.argv + args.split("tunnel://")[1].split("%20")
+    else:
+        sys.argv = sys.argv + args.split("tunnel://")[1].split(" ")
+
+print sys.argv
+time.sleep(10)
 
 def getargs():
     parser = argparse.ArgumentParser(description='Some text');
@@ -48,7 +61,7 @@ def getargs():
                         help='Set You as Server',
                         default=False
                         )
-    return parser.parse_args()
+    return parser.parse_args(sys.argv[1:])
 
 
 

@@ -5,8 +5,7 @@ import socket
 import threading
 from socketIO_client import SocketIO, LoggingNamespace
 
-
-stunUpdater = threading.Thread(target=autoStunUpdate)
+autostun = threading.Thread(target=autoStunUpdate)
 
 def onConnected(*args):
     print('On Connected')
@@ -45,7 +44,7 @@ def onRegister(*args):
     isServer = IS_SERVER
     BUFF_SIZE = 4096
     MTU_SIZE = 1400
-    stunUpdater.start()
+    autostun.start()
     if isServer:
         tunnelMaker.serverSharePort(SOURCE_HOST,SOURCE_PORT,REMOTE_HOST,REMOTE_PORT,localRandomPort,localSharePort)
     # if you are client
@@ -54,23 +53,23 @@ def onRegister(*args):
 
 
 
-mySocketIO = SocketIO(SIGNALSERVERHOST);
 
-mySocketIO.on('registered', onRegister)
-mySocketIO.on('connect', onConnected)
-mySocketIO.on('user-info', onUserInfo)
-mySocketIO.on('error', onRegisterError)
-mySocketIO.on('disconnect', onDisconnect)
-mySocketIO.on('registered', onRegister)
-setSocketIO(mySocketIO)
-doStunRequest()
 
 if DIRECTCONNECTION:
-    tunnelMaker.directConnection(SOURCE_HOST, SOURCE_PORT, REMOTE_HOST, REMOTE_PORT)
+    tunnelMaker.breakthroughTunnel(SOURCE_HOST, SOURCE_PORT, REMOTE_HOST, REMOTE_PORT)
+    autostun.start()
 else:
+    mySocketIO = SocketIO(SIGNALSERVERHOST);
 
+    mySocketIO.on('registered', onRegister)
+    mySocketIO.on('connect', onConnected)
+    mySocketIO.on('user-info', onUserInfo)
+    mySocketIO.on('error', onRegisterError)
+    mySocketIO.on('disconnect', onDisconnect)
+    mySocketIO.on('registered', onRegister)
+    setSocketIO(mySocketIO)
+    doStunRequest()
     regUser()
-
     getInfo()
 
 

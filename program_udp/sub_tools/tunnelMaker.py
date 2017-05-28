@@ -55,7 +55,7 @@ def serverSharePort(LOCAL_IP,LOCAL_PORT,REMOTE_IP,REMOTE_PORT,LOCAL_RANDOM_PORT,
             localSocket.send(sdata)
             buff = ""
             while 1:
-                localData = localSocket.recv(BUFF_SIZE)
+                localData = localSocket.recv(2048)
                 buff += localData
                 if (len(localData) <= 0):
                     break
