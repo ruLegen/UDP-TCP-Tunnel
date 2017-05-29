@@ -1,6 +1,6 @@
 var socket;
 var myID;
-var servername = "localhost:8000";
+var servername = window.location.host;
 //var servername ="http://d2834146.ngrok.io"
 var searchedUsers;
 var currentUser;
@@ -156,7 +156,7 @@ function updateStun() {
     stunFrame.id="STUN_FRAME";
     stunFrame.width = "1";
     $('#info-block').append(stunFrame);
-    $(stunFrame).remove();
+    $(stunFrame).hide();
 
 
 

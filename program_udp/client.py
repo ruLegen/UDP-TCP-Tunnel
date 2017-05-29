@@ -13,12 +13,12 @@ def onConnected(*args):
 def onUserInfo(*args):
     global REMOTE_HOST
     global REMOTE_PORT
-    print "onUserInfo"
+    print("onUserInfo")
     if args[0]:
         REMOTE_HOST = args[0][0]['remoteAddress']
         REMOTE_PORT = args[0][0]['remotePort']
-        print REMOTE_HOST
-        print REMOTE_PORT
+        print( REMOTE_HOST)
+        print( REMOTE_PORT)
         return 1
     else:
         print ('User {0} not found maybe he is not Regsitered. Will try in {1} seconds'.format(REMOTEUSERNAME,REPEAT_TIME_USERSEARCHER))
@@ -36,7 +36,7 @@ def onDisconnect(*args):
 
 def onRegister(*args):
     # here is trafic redirector
-    print "registered"
+    print("registered")
     getUser()
     tunnelMaker.breakthroughTunnel(SOURCE_HOST,SOURCE_PORT,REMOTE_HOST,REMOTE_PORT)
     localSharePort = 8080

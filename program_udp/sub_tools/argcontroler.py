@@ -5,13 +5,15 @@ import time
 args = sys.argv[1]
 if args.startswith("tunnel://"):
     del sys.argv[1]
+    if args[len(args)-1] == "/":
+	    args=args[:len(args)-1]
+
     if "%20" in args:
         sys.argv = sys.argv + args.split("tunnel://")[1].split("%20")
     else:
         sys.argv = sys.argv + args.split("tunnel://")[1].split(" ")
 
-print sys.argv
-time.sleep(10)
+print(sys.argv)
 
 def getargs():
     parser = argparse.ArgumentParser(description='Some text');

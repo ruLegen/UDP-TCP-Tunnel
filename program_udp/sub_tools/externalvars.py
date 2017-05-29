@@ -122,7 +122,7 @@ def updateOwnDataForRequest():
     OWN_DATA['localPort'] = SOURCE_PORT
 
 def getInfo():
-    print """
+    print ("""
     Username {0}
     Local IP {1}
     Local Port {2}
@@ -140,7 +140,7 @@ def getInfo():
                OWN_EXTERNAL_PORT,
                REMOTEUSERNAME,
                REMOTE_HOST,
-               REMOTE_PORT)
+               REMOTE_PORT))
 
 def export(var):
     return eval(var)
@@ -169,11 +169,11 @@ def autoStunUpdate():
     global OWN_DATA
     while 1:
         try:
-            print "Stun going to update"
+            print ("Stun going to update")
             time.sleep(10)
             stunResult=stunRequest(SOURCE_HOST,SOURCE_PORT,stun.STUN_SERVERS[0])
-            print "Updated"
-            print stunResult
+            print ("Updated")
+            print (stunResult)
             time.sleep(3)
         except(Exception):
-            print "wtf"
+            print ("wtf")

@@ -53,7 +53,9 @@ function newConnection(client){
     client.on('update',function (data) {
         UserStore.updateUserWithoutCheck(data.id,data)
         io.sockets.to(data.id).emit('update-self-info',data)
-        console.log(data)
+		
+        console.log(data.id)
+		
     })
     client.on('accept',function (data) {
       io.sockets.to(data.to).emit('connection-accept',data.user)
