@@ -1,0 +1,10 @@
+REGEDIT4 
+[HKEY_CLASSES_ROOT\tunnel] 
+@="URL:tunnel" 
+"URL Protocol"="" 
+[HKEY_CLASSES_ROOT\tunnel\DefaultIcon] 
+@="\"C:\\Python27\\python.exe\"" 
+[HKEY_CLASSES_ROOT\tunnel\shell] 
+[HKEY_CLASSES_ROOT\tunnel\shell\open] 
+[HKEY_CLASSES_ROOT\tunnel\shell\open\command] 
+@="\"C:\\Python27\\python.exe\" \"C:\\Users\\root\\Documents\\GitHub\\UDP-TCP-Tunnel\\program_udp\\client.py\" \"%1\"" 
