@@ -1,7 +1,6 @@
 var socket;
 var myID;
 var servername = window.location.host;
-//var servername ="http://d2834146.ngrok.io"
 var searchedUsers;
 var currentUser;
 var stunUpdated = false
@@ -14,9 +13,7 @@ var selfInfo = {
     remoteAddress:"",
     remotePort: ""
 }
-$(window).on('beforeunload', function(){
-    socket.close();
-});
+
 var translatedInfo ={
     id:"ID",
     username: "Имя",
@@ -59,8 +56,11 @@ function connectionAccept(data) {
     console.log("tunnel://"+args)
 
     $('#info-block').append(stunFrame);
-    $(stunFrame).remove();
-}
+
+	setInterval(function(){
+	$(stunFrame).remove();
+	},500)
+   }
 function connectionDecline(data) {
      Materialize.toast("Запрос отклонен ("+data.username+")",4000,"red");
 }
@@ -78,11 +78,10 @@ function remoteUserInfo(data) {
     searchedUsers = data;
     $('.progress').animate({opacity: 0},300);
     data.map(function (element,index) {
-      createListItem(element.username,index,document.querySelector('.collection'))
+      createListItem(element.username,
+					 index,document.querySelector('.collection'))
     });
     $('.remote-user-item').on('click',renderRemoteInfo);
-
-
 }
 
 function sendTo(data) {
@@ -157,10 +156,9 @@ function updateStun() {
     stunFrame.width = "1";
     $('#info-block').append(stunFrame);
     $(stunFrame).hide();
-
-
-
-    //window.assign(link.href)
+	setInterval(function(){
+	$(stunFrame).remove();
+	},500)
 }
 
 function register() {
